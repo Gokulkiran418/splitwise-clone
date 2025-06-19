@@ -25,65 +25,58 @@ function GroupPage() {
   }, []);
 
   return (
-    <div className="h-[calc(100vh-80px)] grid grid-cols-3 gap-4 p-4">
-      {/* Left Column: Full-height Create Group */}
-      <div className="col-span-1 overflow-y-auto bg-white p-4 rounded-lg shadow-md">
-        <h2 className="text-xl font-semibold mb-4">Create Group</h2>
+  <div className="flex flex-col md:flex-row p-4 space-y-4 md:space-y-0 md:space-x-4">
+    {/* Left Panel: Select & Create */}
+    <div className="flex-1 flex flex-col space-y-4">
+      <div className="bg-white p-4 rounded shadow">
+        <h2 className="text-lg font-semibold mb-2">Select Group</h2>
+        {error && <p className="text-red-500 mb-2">{error}</p>}
+        {groups.length > 0 ? (
+          <select
+            value={selectedGroupId || ''}
+            onChange={e =>
+              setSelectedGroupId(e.target.value ? parseInt(e.target.value) : null)
+            }
+            className="w-full p-2 border rounded"
+          >
+            <option value="">-- Choose a group --</option>
+            {groups.map(g => (
+              <option key={g.id} value={g.id}>{g.name}</option>
+            ))}
+          </select>
+        ) : (
+          <p>No groups available</p>
+        )}
+      </div>
+      <div className="bg-white p-4 rounded shadow">
+        <h2 className="text-lg font-semibold mb-2">Create Group</h2>
         <GroupForm onGroupAdded={fetchGroups} />
       </div>
+    </div>
 
-      {/* Right Column: Select Group + Expense + Balance */}
-      <div className="col-span-2 grid grid-rows-[auto_1fr_1fr] gap-4 h-full">
-        {/* Top Row: Select Group */}
-<div className="bg-white p-4 rounded-lg shadow-md overflow-y-auto">
-  <h2 className="text-lg font-semibold mb-2">Select Group</h2>
-  {error && <p className="text-red-500 text-sm mb-2">{error}</p>}
-  {groups.length > 0 ? (
-    <select
-      value={selectedGroupId || ''}
-      onChange={(e) =>
-        setSelectedGroupId(e.target.value ? parseInt(e.target.value) : null)
-      }
-      className="p-2 w-full border rounded-md"
-    >
-      <option value="">Select a group</option>
-      {groups.map((group) => (
-        <option key={group.id} value={group.id}>
-          {group.name}
-        </option>
-      ))}
-    </select>
-  ) : (
-    <p>No groups found</p>
-  )}
-  {selectedGroupId && (
-    <p className="text-sm text-gray-500 mt-2">Scroll down to see balances.</p>
-  )}
-</div>
-
-        {/* Middle Row: ExpenseForm */}
-        <div className="bg-white p-4 rounded-lg shadow-md overflow-y-auto">
-          {selectedGroupId ? (
-            <ExpenseForm
-              groupId={selectedGroupId}
-              onExpenseAdded={() => setRefreshKey((prev) => prev + 1)}
-            />
-          ) : (
-            <p className="text-gray-500 text-center">Select a group to add expenses</p>
-          )}
-        </div>
-
-        {/* Bottom Row: BalanceView */}
-        <div className="bg-white p-4 rounded-lg shadow-md overflow-y-auto">
-          {selectedGroupId ? (
-            <BalanceView groupId={selectedGroupId} refreshKey={refreshKey} />
-          ) : (
-            <p className="text-gray-500 text-center">Select a group to view balances</p>
-          )}
-        </div>
+    {/* Right Panel: Expense & Balance */}
+    <div className="flex-1 flex flex-col space-y-4">
+      <div className="bg-white p-4 rounded shadow flex-1">
+        {selectedGroupId ? (
+          <ExpenseForm
+            groupId={selectedGroupId}
+            onExpenseAdded={() => setRefreshKey(k => k + 1)}
+          />
+        ) : (
+          <p className="text-gray-500">Select a group to add expenses</p>
+        )}
+      </div>
+      <div className="bg-white p-4 rounded shadow flex-1">
+        {selectedGroupId ? (
+          <BalanceView groupId={selectedGroupId} refreshKey={refreshKey} />
+        ) : (
+          <p className="text-gray-500">Select a group to view balances</p>
+        )}
       </div>
     </div>
-  );
+  </div>
+);
+
 }
 
 export default GroupPage;
