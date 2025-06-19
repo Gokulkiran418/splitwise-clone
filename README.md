@@ -9,9 +9,9 @@ A full-stack Splitwise clone built with **FastAPI**, **React**, **Docker**, **Po
 - User and group creation
 - Add and split expenses
 - View individual balances and group expenses
-- AI Chatbot to parse queries like:
+- AI Chatbot to parse queries like:(using gpt-3.5-turbo)
   - “How much does Alice owe?”
-  - “Show my last 3 expenses”
+  - “Show my last 3 expenses” (use numbers, not "one" or "two")
   - “Who paid the most in Goa Trip?”
 
 ---
