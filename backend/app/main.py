@@ -5,12 +5,16 @@ from fastapi.middleware.cors import CORSMiddleware
 from app.api import router
 from app.database import Base, engine
 
+# Load environment variables from .env file
+ # Point to backend/app/.env
 load_dotenv()
-openai_api_key = os.getenv("OPENAI_API_KEY")
+
 # Create database tables
 Base.metadata.create_all(bind=engine)
 
 app = FastAPI(title="Splitwise Clone API")
+openai_api_key = os.getenv("OPENAI_API_KEY")
+
 # Allow CORS for frontend communication (localhost:3000 for React)
 app.add_middleware(
     CORSMiddleware,
