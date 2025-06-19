@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import api from '../api';
 
-function BalanceView({ groupId }) {
+function BalanceView({ groupId, refreshKey }) {
   const [balances, setBalances] = useState(null);
   const [error, setError] = useState('');
 
@@ -16,12 +16,12 @@ function BalanceView({ groupId }) {
       }
     };
     fetchBalances();
-  }, [groupId]);
+  }, [groupId, refreshKey]); // Re-fetch when groupId or refreshKey changes
 
   if (!balances) return <p>Loading...</p>;
 
   return (
-    <div className="bg-white p-6 rounded-lg shadow-md">
+    <div className="bg-white p-6 rounded-lg shadow-md flex-1">
       <h2 className="text-lg font-semibold mb-4">Group Balances: {balances.name}</h2>
       {error && <p className="text-red-500 text-sm mb-4">{error}</p>}
       <h3 className="text-md font-medium mb-2">Individual Balances</h3>
