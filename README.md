@@ -1,6 +1,6 @@
 # Splitwise Clone
 
-A full-stack Splitwise clone built with **FastAPI**, **React**, and **PostgreSQL**, featuring AI-powered chat capabilities via **OpenAI**. This app lets users manage group expenses, track balances, and query financial data conversationally.
+A full-stack Splitwise clone built with **FastAPI**, **React**, **Docker**, **PostgreSQL**, featuring AI-powered chat capabilities via **OpenAI**. This app lets users manage group expenses, track balances, and query financial data conversationally.
 
 ---
 
@@ -18,8 +18,9 @@ A full-stack Splitwise clone built with **FastAPI**, **React**, and **PostgreSQL
 ## Assumptions Made
 
 - Project assumes a Dockerized PostgreSQL database or one running locally.
-- Project assumes you have an OpenAI API key. Sorry its dangerous to upload private key in GitHub.
-- Without OpenAI API only chatbot feature won't work. 
+- Project assumes you have an OpenAI API key(Only for chat feature). Sorry its dangerous to upload private key in GitHub.
+    Without OpenAI API only chatbot feature won't work.   
+- Project assumes you have patience since Docker Build and npm install takes a long time.
 - Frontend and backend are separated in the project structure.
 
 ## 📦 Prerequisites
@@ -34,6 +35,15 @@ Ensure the following are installed:
 
 ---
 
+## ✨ Getting Started
+
+### 1. Clone the Repository
+
+```bash
+git clone https://github.com/Gokulkiran418/splitwise-clone.git
+cd splitwise-clone
+```
+
 ## 📁 Project Structure
 
 ```
@@ -43,34 +53,39 @@ splitwise-clone/
 │   │   ├── __init__.py
 │   │   ├── main.py
 │   │   ├── api.py
-│   │   ├── database.py
 │   │   ├── models.py
-│   │   └── .env
+│   │   └── database.py
+│   ├── .env
 │   ├── requirements.txt
 │   └── Dockerfile
 ├── frontend/
+│   ├── public/
+│   │   ├── index.html
+│   │   └── favicon.ico
 │   ├── src/
-│   │   ├── api.js
 │   │   ├── components/
-│   │   │   └── Chatbot.js
+│   │   │   ├── BalanceView.js
+│   │   │   ├── Chatbot.js
+│   │   │   ├── ExpenseForm.js
+│   │   │   ├── GroupForm.js
+│   │   │   └── UserForm.js
 │   │   ├── pages/
 │   │   │   ├── HomePage.js
-│   │   │   └── GroupPage.js
+│   │   │   ├── GroupPage.js
+│   │   │   └── UserPage.js
+│   │   ├── api.js
+│   │   ├── App.css
+│   │   ├── App.js
+│   │   ├── index.css
+│   │   ├── index.js
+│   │   └── package-lock.json
 │   ├── package.json
 │   └── Dockerfile
 ├── docker-compose.yml
+├── tailwind.config.js
+├── postcss.config.js
+├── venv/
 └── README.md
-```
-
----
-
-## ✨ Getting Started
-
-### 1. Clone the Repository
-
-```bash
-git clone https://github.com/Gokulkiran418/splitwise-clone.git
-cd splitwise-clone
 ```
 
 ### 2. Add Environment Variables
@@ -97,15 +112,15 @@ DATABASE_URL=postgresql://postgres:mypassword@db:5432/splitwise
 ```bash
 cd backend
 python -m venv venv
-venv\Scripts\activate # Windows bash: source venv/Scripts/activate, MAC and Linux: source venv/bin/activate
+venv\Scripts\activate # VSCode bash: source venv/Scripts/activate, MAC and Linux: source venv/bin/activate
 pip install -r requirements.txt
 cd ..
 ```
 - Important!
 - CTRL + SHIFT + P (command palette) 
 - Python: Select Interpreter
-- Enter Interpreter Path -> Find
-- Locate venv/Scripts/python.exe in the project root and double click python.exe
+- Select "Enter Interpreter Path" -> Select Find
+- Locate venv/Scripts/python.exe(windows) or  venv/bin/python.exe(Mac) in the project root and double click python.exe
 
 #### Frontend
 
