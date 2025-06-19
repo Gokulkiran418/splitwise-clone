@@ -263,7 +263,18 @@ def get_group_balances(group_id: int, db: Session = Depends(get_db)):
         balances=balances,
         settlements=settlements
     )
-
+@router.get("/groups", response_model=List[GroupResponse])
+def get_groups(db: Session = Depends(get_db)):
+    groups = db.query(Group).all()
+    return [
+        GroupResponse(
+            id=group.id,
+            name=group.name,
+            users=[UserResponse.from_orm(gm.user) for gm in group.members],
+            total_expenses=sum(expense.amount for expense in group.expenses)
+        )
+        for group in groups
+    ]
 @router.get("/users/{user_id}/balances", response_model=UserBalancesResponse)
 def get_user_balances(user_id: int, db: Session = Depends(get_db)):
     user = db.query(User).filter(User.id == user_id).first()
