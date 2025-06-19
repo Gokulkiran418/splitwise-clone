@@ -78,7 +78,7 @@ cd splitwise-clone
 Create a `.env` file in `backend/app/`:
 
 ```bash
-touch backend/app/.env
+touch backend/.env
 ```
 - To use Chatbot feature paste your OpenAI API key in .env
 
@@ -93,14 +93,19 @@ DATABASE_URL=postgresql://postgres:mypassword@db:5432/splitwise
 ### 3. Install Dependencies
 
 #### Backend
-
+- VSCode Default Terminal(Other OS and bash commands given below)
 ```bash
 cd backend
 python -m venv venv
-source venv/bin/activate  # Windows: venv\Scripts\activate
+venv\Scripts\activate # Windows bash: source venv/Scripts/activate, MAC and Linux: source venv/bin/activate
 pip install -r requirements.txt
 cd ..
 ```
+- Important!
+- CTRL + SHIFT + P (command palette) 
+- Python: Select Interpreter
+- Enter Interpreter Path -> Find
+- Locate venv/Scripts/python.exe in the project root and double click python.exe
 
 #### Frontend
 
@@ -111,12 +116,12 @@ npm install -D tailwindcss@3 postcss autoprefixer
 npx tailwindcss init -p
 cd ..
 ```
-
----
+- Deprecated warnings and severity warnings can be ignored.
+- These warnings doesn't affect workflow of project.
 
 ## 🛠️ Docker Setup
 
-- Download Docker [text](https://www.docker.com/products/docker-desktop/)
+- Download Docker [Download Docker](https://www.docker.com/products/docker-desktop/)
 - Install Docker
 
 ### 4. Run the Application
@@ -131,49 +136,220 @@ docker-compose up --build
 - Frontend: [http://localhost:3000](http://localhost:3000)
 - API Docs: [http://localhost:8000/docs](http://localhost:8000/docs)
 
+### Running Project without Docker
+
+- Install PostgreSQL(pgadmin) (Note username and password)
+- Create Database, Example splitwise.
+- Go to root backend/app/database.py 
+- Change mypassword to PostgreSQL user password, database with your database name
+  postgresql://postgres:mypassword@localhost:5432/database
+- Open two terminals in VSCODE for backend and frontend
+- Make sure to run venv command in root folder
+  venv\Scripts\activate Windows bash: source venv/Scripts/activate , MAC and Linux: source venv/bin/activate
+- Backend(from root)
+```bash
+cd backend
+uvicorn app.main:app --reload
+```
+- Frontend(from root)
+```bash
+cd frontend
+npm start
+```
+- Open http://localhost:3000
+
+## 📘 FastAPI Auto-Generated Documentation
+
+The **Splitwise Clone** project uses [FastAPI](https://fastapi.tiangolo.com/), a modern Python web framework that auto-generates interactive API documentation.
+
+### 🔗 Accessing the API Docs
+
+FastAPI provides two built-in documentation UIs:
+
+- **Swagger UI** – Interactive and great for testing endpoints  
+  👉 [http://localhost:8000/docs](http://localhost:8000/docs)
+
+- **ReDoc** – A clean, readable documentation view  
+  👉 [http://localhost:8000/redoc](http://localhost:8000/redoc)
+
+> ✅ Ensure the backend is running before accessing these URLs.
+
 ---
 
-## 💳 Usage
+### ⚙️ Prerequisites
 
-### Add Users
+## 🧪 Using Swagger UI
 
-- Go to homepage (`/`) and use the "Add User" form
-- Users will appear instantly in the chatbot dropdown and user list
+#### `GET /users`
+Retrieve all users.
 
-### Create Groups
-
-- Navigate to `/groups` and use the group form
-- Groups show up in dropdowns
-
-### Add Expenses
-
-- Inside a group page, use the expense form
-- Balances update in real time
-
-### Use the Chatbot
-
-- Open the chat bubble (bottom-right corner)
-- Select a user from the dropdown
-- Try queries like:
-  - "How much does Alice owe in Goa Trip?"
-  - "Show me my last 3 expenses"
-  - "Who paid the most in Weekend Trip?"
+**Try It Out → Execute → Response:**
+```json
+[
+  { "id": 1, "name": "Alice" },
+  { "id": 2, "name": "Bob" }
+]
+```
 
 ---
+
+#### `POST /users`
+Create a new user.
+```json
+{
+  "name": "Charlie"
+}
+```
+**Response:**
+```json
+{
+  "id": 3,
+  "name": "Charlie"
+}
+```
+
+---
+
+#### `GET /groups`
+Retrieve all groups.
+```json
+[
+  { "id": 1, "name": "Goa Trip" },
+  { "id": 2, "name": "Weekend Trip" }
+]
+```
+
+---
+
+#### `POST /groups`
+Create a new group.
+```json
+{
+  "name": "Beach Vacation",
+  "member_ids": [1, 2]
+}
+```
+**Response:**
+```json
+{
+  "id": 3,
+  "name": "Beach Vacation",
+  "members": [
+    { "id": 1, "name": "Alice" },
+    { "id": 2, "name": "Bob" }
+  ]
+}
+```
+
+---
+
+#### `POST /expenses`
+Create a new expense.
+```json
+{
+  "group_id": 1,
+  "description": "Dinner",
+  "amount": 100.0,
+  "paid_by_id": 1,
+  "splits": [
+    { "user_id": 1, "share_amount": 50.0 },
+    { "user_id": 2, "share_amount": 50.0 }
+  ]
+}
+```
+
+---
+
+#### `GET /users/{user_id}/balance`
+Check balance of a specific user.
+```json
+{
+  "user_id": 1,
+  "name": "Alice",
+  "total_balance": -50.0,
+  "group_balances": [
+    {
+      "group_id": 1,
+      "group_name": "Goa Trip",
+      "balance": -50.0
+    }
+  ]
+}
+```
+
+---
+
+#### `POST /chat`
+Ask questions using natural language.
+```json
+{
+  "query": "How much does Alice owe in group Goa Trip?",
+  "current_user_id": 1
+}
+```
+**Response:**
+```json
+{
+  "response": "Alice owes $50 in Goa Trip."
+}
+```
+
+---
+
+## 📑 Schema Section (at bottom of Swagger UI)
+
+You can view all Pydantic model definitions, including:
+- Fields with types (`string`, `integer`, `float`, etc.)
+- Required vs optional fields
+- Example payloads
+
+**Example: `ChatRequest` model**
+```json
+{
+  "query": "string",
+  "current_user_id": "integer | null"
+}
+```
+
+---
+
+## ❗ Common Errors
+
+FastAPI's docs will show error responses:
+
+- `422 Unprocessable Entity` – Missing or invalid fields
+- `404 Not Found` – Resource not found
+- `500 Internal Server Error` – Server-side issues
+
+Example error for `POST /users` with empty name:
+```json
+{
+  "detail": "Name is required"
+}
+```
+
+---
+
+## 📎 Copying Curl Commands
+
+Each request tested in Swagger UI provides a `curl` tab for CLI use.
+
+**Example: `POST /chat`**
+```bash
+curl -X 'POST' \
+  'http://localhost:8000/chat' \
+  -H 'accept: application/json' \
+  -H 'Content-Type: application/json' \
+  -d '{"query":"How much does Alice owe in group Goa Trip?","current_user_id":1}'
+```
+
+Use this for scripting, testing, or integrating with external tools.
 
 ## ⏹️ Stop the App
 
 ```bash
 docker-compose down
 ```
-
-To remove database data:
-
-```bash
-docker-compose down -v
-```
-
----
 
 ## ⚡ Troubleshooting
 
