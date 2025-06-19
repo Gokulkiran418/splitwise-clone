@@ -1,8 +1,12 @@
+from dotenv import load_dotenv
+import os
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from app.api import router
 from app.database import Base, engine
 
+load_dotenv()
+openai_api_key = os.getenv("OPENAI_API_KEY")
 # Create database tables
 Base.metadata.create_all(bind=engine)
 

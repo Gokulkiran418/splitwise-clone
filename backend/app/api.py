@@ -1,12 +1,104 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
+from sqlalchemy.sql import func
 from pydantic import BaseModel, validator, Field
 from typing import List, Optional
+import json
 from app.database import get_db
 from app.models import User, Group, GroupMember, Expense, ExpenseSplit, SplitType
 import math
+from openai import OpenAI
+import os
 
 router = APIRouter()
+client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+
+def parse_query(query: str, current_user_name: str = None):
+    messages = [
+        {"role": "system", "content": "You are an assistant that parses queries to determine intents and extract entities."},
+        {"role": "user", "content": f"""
+        Parse this query: '{query}'
+        Possible intents:
+        - get_user_balance: extract user_name and group_name
+        - get_user_expenses: extract user_name and num_expenses
+        - get_top_payer: extract group_name
+        If 'my' is in the query, replace it with the current user's name if provided.
+        Current user: {current_user_name}
+        Respond with a JSON object containing 'intent' and the extracted entities.
+        """}
+    ]
+    response = client.chat.completions.create(
+        model="gpt-3.5-turbo",
+        messages=messages,
+        max_tokens=100,
+        temperature=0
+    )
+    return json.loads(response.choices[0].message.content.strip())
+
+def generate_response(intent: str, data: dict):
+    messages = [
+        {"role": "system", "content": "Generate natural language responses based on data."},
+        {"role": "user", "content": f"Generate a response for intent '{intent}' with data: {data}"}
+    ]
+    response = client.chat.completions.create(
+        model="gpt-3.5-turbo",
+        messages=messages,
+        max_tokens=50,
+        temperature=0.7
+    )
+    return response.choices[0].message.content.strip()
+
+@router.post("/chat")
+async def chat(query: str, current_user_id: int = None, db: Session = Depends(get_db)):
+    current_user_name = None
+    if current_user_id:
+        current_user = db.query(User).filter(User.id == current_user_id).first()
+        current_user_name = current_user.name if current_user else None
+
+    parsed = parse_query(query, current_user_name)
+    intent = parsed["intent"]
+
+    if intent == "get_user_balance":
+        user_name = parsed["user_name"]
+        group_name = parsed["group_name"]
+        user = db.query(User).filter(User.name == user_name).first()
+        group = db.query(Group).filter(Group.name == group_name).first()
+        if not user or not group:
+            return {"response": "User or group not found."}
+        # Replace with your actual balance calculation logic
+        balance = sum(e.amount for e in db.query(Expense).filter(Expense.group_id == group.id, Expense.paid_by_id == user.id).all())  # Simplified
+        data = {"balance": balance if balance >= 0 else -balance}
+        response = generate_response(intent, data)
+        return {"response": response}
+
+    elif intent == "get_user_expenses":
+        user_name = parsed["user_name"]
+        num_expenses = int(parsed["num_expenses"])
+        user = db.query(User).filter(User.name == user_name).first()
+        if not user:
+            return {"response": "User not found."}
+        expenses = db.query(Expense).filter(Expense.paid_by_id == user.id).order_by(Expense.id.desc()).limit(num_expenses).all()
+        data = [{"description": e.description, "amount": e.amount} for e in expenses]
+        response = generate_response(intent, data)
+        return {"response": response}
+
+    elif intent == "get_top_payer":
+        group_name = parsed["group_name"]
+        group = db.query(Group).filter(Group.name == group_name).first()
+        if not group:
+            return {"response": "Group not found."}
+        top_payer = db.query(User).join(Expense, Expense.paid_by_id == User.id)\
+            .filter(Expense.group_id == group.id)\
+            .group_by(User.id)\
+            .order_by(func.sum(Expense.amount).desc())\
+            .first()
+        if top_payer:
+            data = {"user_name": top_payer.name}
+            response = generate_response(intent, data)
+            return {"response": response}
+        return {"response": "No expenses in this group."}
+
+    return {"response": "I didn’t understand that query."}
 
 # Pydantic Models
 class UserCreate(BaseModel):
