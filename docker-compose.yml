@@ -1,3 +1,5 @@
+version: '3.8'
+
 services:
   db:
     image: postgres:14
@@ -20,8 +22,11 @@ services:
       context: ./backend
     ports:
       - "8000:8000"
+    command: uvicorn app.main:app --host 0.0.0.0 --port 8000
     environment:
       - DATABASE_URL=postgresql://postgres:mypassword@db:5432/splitwise
+    env_file:
+      - ./backend/.env   # ✅ This allows load_dotenv() to work in container
     depends_on:
       db:
         condition: service_healthy
@@ -36,7 +41,7 @@ services:
     depends_on:
       - backend
     volumes:
-      # - ./frontend:/app
+      # - ./frontend:/app   # Uncomment for live dev (hot reload), comment for prod build
       - /app/node_modules
       - /app/build
 

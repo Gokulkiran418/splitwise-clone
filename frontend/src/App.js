@@ -2,6 +2,7 @@ import { BrowserRouter as Router, Route, Routes, Link } from 'react-router-dom';
 import HomePage from './pages/HomePage';
 import GroupPage from './pages/GroupPage';
 import UserPage from './pages/UserPage';
+import Chatbot from './components/Chatbot';
 
 function App() {
   return (
@@ -26,6 +27,7 @@ function App() {
             <Route path="/users/:userId" element={<UserPage />} />
           </Routes>
         </div>
+        <Chatbot />
       </div>
     </Router>
   );
