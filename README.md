@@ -18,9 +18,8 @@ A full-stack Splitwise clone built with **FastAPI**, **React**, **Docker**, **Po
 ## Assumptions Made
 
 - Project assumes a Dockerized PostgreSQL database or one running locally.
-- Project assumes you have an OpenAI API key(Only for chat feature). Sorry its dangerous to upload private key in GitHub.
+- Project assumes you have an OpenAI API key(Only for chat feature). 
     Without OpenAI API only chatbot feature won't work.   
-- Project assumes you have patience since Docker Build and npm install takes a long time.
 - Frontend and backend are separated in the project structure.
 
 ## 📦 Prerequisites
@@ -133,6 +132,7 @@ cd ..
 ```
 - Deprecated warnings and severity warnings can be ignored.
 - These warnings doesn't affect workflow of project.
+- npm install takes some time.
 
 ## 🛠️ Docker Setup
 
@@ -146,6 +146,7 @@ cd ..
 ```bash
 docker-compose up --build
 ```
+- Docker Build takes some time.
 
 - Backend: [http://localhost:8000](http://localhost:8000)
 - Frontend: [http://localhost:3000](http://localhost:3000)
